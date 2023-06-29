@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
 # Leer el archivo CSV y almacenar los datos en el DataFrame df.
-df = pd.read_csv("C:\ws\DATOS_INC_DELICT\IDEFC_NM_may23.csv", encoding='Windows-1252')
+df = pd.read_csv("IDEFC_NM_may23.csv", encoding='Windows-1252')
 
 # Crear una condición de filtrado basada en los valores de las columnas 'Tipo de delito' y 'Subtipo de delito'.
 filtro = (df['Tipo de delito'] == 'Homicidio') & (df['Subtipo de delito'] == 'Homicidio doloso')
@@ -82,16 +82,16 @@ cols_a_mantener = ['Año', 'Clave_Ent', 'Entidad', 'Tipo de delito', 'Subtipo de
 df_filtrado11 = df_filtrado1.loc[:, cols_a_mantener]
 
 # Guarda el DataFrame df_filtrado11 en un archivo CSV ubicado en la ruta especificada. El parámetro index=False indica que no se debe incluir la columna de índice en el archivo CSV resultante.
-df_filtrado11.to_csv("C:/ws/DATOS_INC_DELICT/incidencia_hom_dol_2015_2023_desagregado.csv", index=False)
+df_filtrado11.to_csv("incidencia_hom_dol_2015_2023_desagregado.csv", index=False)
 
 # Sumar el total de delitos por mes.
 dataframe_agrupado = df_filtrado11.groupby(['Entidad', 'Año', 'Clave_Ent'], as_index=False).sum()
 
 # Guarda el DataFrame dataframe_agrupado en un archivo CSV sin incluir el índice y con la ruta especificada.
-dataframe_agrupado.to_csv("C:/ws/DATOS_INC_DELICT/incidencia_hom_dol_15_23_total.csv", index=False)
+dataframe_agrupado.to_csv("incidencia_hom_dol_15_23_total.csv", index=False)
 
 # Carga los datos del segundo dataframe de las poblaciones estatales proyectadas.
-df2 = pd.read_csv('C:\ws\DATOS_INC_DELICT\proyecciones_poblacion_estatal.csv', encoding='Windows-1252')
+df2 = pd.read_csv('proyecciones_poblacion_estatal.csv', encoding='Windows-1252')
 
 # Crea una segunda lista con las entidades.
 cols_a_modificar2 = ['Entidad']
@@ -124,7 +124,7 @@ cols_a_mantener2 = ['Año','Entidad','Clave_Ent','Poblacion']
 
 # Crea un nuevo DataFrame llamado df_filtrado21 a partir del DataFrame df2. Selecciona todas las filas (:) y solo las columnas especificadas en la lista cols_a_mantener. Esto implica mantener únicamente las columnas que se encuentran en la lista cols_a_mantener2 y descartar el resto de las columnas.
 df_filtrado21 = df2.loc[:, cols_a_mantener2]
-df_filtrado21.to_csv("C:/ws/DATOS_INC_DELICT/proyecciones_poblacion_estatal_formateado.csv", index=False)
+df_filtrado21.to_csv("proyecciones_poblacion_estatal_formateado.csv", index=False)
 
 # Combina dos DataFrames, dataframe_agrupado y df_filtrado21, utilizando las columnas "Año", "Entidad" y "Clave_Ent" como claves de unión. El parámetro how='inner' especifica que se realice una intersección entre los conjuntos de datos, es decir, solo se incluirán las filas que tengan valores coincidentes en las columnas de unión en ambos DataFrames.
 df_combinado = pd.merge(dataframe_agrupado, df_filtrado21, on=['Año', 'Entidad', 'Clave_Ent',], how='inner')
@@ -141,10 +141,10 @@ for mes in ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Ago
     df_combinado[mes + '_percapita'] = df_combinado.apply(lambda row: calcular_division(row, mes), axis=1)
 
 # El DataFrame df_combinado se guarda en un archivo CSV con el nombre "incidencia_hom_dol_15_23_total_percapita.csv". El parámetro index=False se utiliza para evitar que se agregue una columna adicional con los índices del DataFrame.
-df_combinado.to_csv("C:/ws/DATOS_INC_DELICT/incidencia_hom_dol_15_23_total_percapita.csv", index=False)
+df_combinado.to_csv("incidencia_hom_dol_15_23_total_percapita.csv", index=False)
 
 # Se lee un archivo shapefile llamado "00ent.shp" utilizando la función gpd.read_file de la librería GeoPandas. El DataFrame resultante se asigna a la variable estados. A continuación, se aplica la proyección EPSG:4326 a los datos geoespaciales utilizando el método to_crs.
-estados = gpd.read_file('C:\ws\DATOS_INC_DELICT\\00ent.shp')
+estados = gpd.read_file('00ent.shp')
 estados = estados.to_crs("EPSG:4326")
 
 # Se renombran las columnas 'CVE_ENT' y 'NOMGEO' del DataFrame estados a 'Clave_Ent' y 'Entidad', respectivamente, utilizando el método rename. Además, se convierte la columna 'Clave_Ent' al tipo de dato 'int64' utilizando el método astype.
@@ -161,7 +161,7 @@ for col in cols_a_modificar3:
 df_homicidios_geometry_estados = pd.merge(estados, df_combinado, on=['Clave_Ent'], how='inner')
 
 # El DataFrame df_homicidios_geometry_estados se guarda en un archivo CSV con el nombre "df_homicidios_geometry_estados.csv". El parámetro index=False se utiliza para evitar que se agregue una columna adicional con los índices del DataFrame.
-df_homicidios_geometry_estados.to_csv("C:/ws/DATOS_INC_DELICT/df_homicidios_geometry_estados.csv", index=False)
+df_homicidios_geometry_estados.to_csv("df_homicidios_geometry_estados.csv", index=False)
 
 # Se define la función plot_homicide_incidence que toma como argumentos un año y un mes. La función filtra los datos en df_homicidios_geometry_estados para obtener solo las filas correspondientes al año proporcionado. Luego, se define un diccionario month_names que mapea los códigos de mes ('01', '02', etc.) a los nombres de los meses en español. El nombre del mes se determina mediante la consulta al diccionario month_names utilizando el código del mes proporcionado. Se configuran las opciones de color para el mapa y se crea una figura y un eje utilizando plt.subplots. A continuación, se realiza el trazado del mapa utilizando la columna correspondiente al mes per cápita, se dibujan los límites de los estados y se guarda la figura en un archivo PNG.
 def plot_homicide_incidence(year, month):
@@ -190,7 +190,7 @@ def plot_homicide_incidence(year, month):
     datos.plot(f'{month_name}_percapita', ax=ax, edgecolor='#d3d3d3', linewidth=0.2, legend=True, colormap=cmap_inverted, vmin=0.0000, vmax=0.00013).set_title(f'Incidencia de homicidios culposos (corregido\n per capita) en {month_name} del {year}')
     estados.plot(ax=ax, color='none', edgecolor='black', linewidth=0.5)
     # Guardar el mapa en formato PNG
-    fig.savefig(f'C:\ws\DATOS_INC_DELICT\mapa_estados_percapita_{year}_{month}.png', dpi=500)
+    fig.savefig(f'mapa_estados_percapita_{year}_{month}.png', dpi=500)
     plt.show()
 estados
 plot_homicide_incidence(2015, '01')
@@ -329,7 +329,7 @@ def plot_homicide_incidence2(year, month):
     estados.plot(ax=ax, color='none', edgecolor='black', linewidth=0.5)
 
 # Se guarda la figura en un archivo PNG utilizando el método savefig. El archivo se guarda en la ubicación especificada en la ruta con nombres que contienen el año y el mes. Luego, se muestra el gráfico utilizando plt.show().
-    fig.savefig(f'C:\ws\DATOS_INC_DELICT\mapa_estados_casos_{year}_{month}.png', dpi=500)
+    fig.savefig(f'mapa_estados_casos_{year}_{month}.png', dpi=500)
     plt.show()
 
 plot_homicide_incidence2(2015, '01')
